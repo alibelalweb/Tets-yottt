@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سجل المربين</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 30px;
+    }
+    .hidden {
+      display: none;
+    }
+    /* زر القائمة الرئيسي */
+    .menu-btn {
+      background-color: #009688;
+      color: white;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    .menu-btn:hover {
+      background-color: #00796b;
+    }
+    /* قائمة التنقل */
+    .menu {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: none;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 200px;
+      z-index: 1000;
+    }
+    .menu.show {
+      display: block;
+    }
+    .menu .menu-btn {
+      display: block;
+      margin-bottom: 10px;
+    }
+    .record {
+      background-color: #f9f9f9;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      border: 1px solid #ddd;
+      transition: background-color 0.3s ease;
+    }
+    .record:hover {
+      background-color: #f1f1f1;
+    }
+    .edit-btn,
+    .delete-btn,
+    .hide-btn {
+      background-color: #FFC107;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      cursor: pointer;
+      margin-left: 5px;
+      border-radius: 5px;
+    }
+    .delete-btn {
+      background-color: #E91E63;
+    }
+    .hide-btn {
+      background-color: #FF5722;
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="datetime-local"],
+    select {
+      padding: 10px;
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 10px;
+    }
+    a {
+      color: blue;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- زر القائمة -->
+  <button class="menu-btn" onclick="toggleMenu()">☰ القائمة</button>
+
+  <!-- القائمة الجانبية -->
+  <div id="menu" class="menu">
+    <button class="menu-btn" onclick="showSection('main')">القائمة الرئيسية</button>
+    <button class="menu-btn" onclick="showSection('breeders')">سجل المربين</button>
+    <button class="menu-btn" onclick="showSection('resetPassword')">إعادة تعيين كلمة المرور</button>
+    <button class="menu-btn" onclick="logout()">تسجيل خروج</button>
+  </div>
+
+  <!-- صفحة تسجيل الدخول -->
+  <div id="login" class="container hidden">
+    <h2>تسجيل الدخول</h2>
+    <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+    <input type="password" id="loginPassword" placeholder="كلمة المرور">
+    <button class="menu-btn" onclick="loginUser()">تسجيل الدخول</button>
+    <p style="margin-top:15px;">
+      <span style="color:#fff; background-color:#333; padding:5px 10px; border-radius:5px;">
+        ليس لديك حساب؟ <a onclick="showSection('register')">اضغط هنا للإنشاء</a>
+      </span>
+    </p>
+    <p style="margin-top:15px;">
+      <a onclick="showSection('resetPassword')">نسيت كلمة المرور؟</a>
+    </p>
+  </div>
+
+  <!-- صفحة إنشاء الحساب -->
+  <div id="register" class="container hidden">
+    <h2>إنشاء حساب</h2>
+    <input type="text" id="registerUsername" placeholder="اسم المستخدم">
+    <input type="email" id="registerEmail" placeholder="البريد الإلكتروني">
+    <input type="password" id="registerPassword" placeholder="كلمة المرور">
+    <input type="password" id="registerConfirmPassword" placeholder="تأكيد كلمة المرور">
+    <button class="menu-btn" onclick="registerUser()">إنشاء حساب</button>
+    <p style="margin-top:15px;">
+      <span style="color:#fff; background-color:#333; padding:5px 10px; border-radius:5px;">
+        هل لديك حساب؟ <a onclick="showSection('login')">اضغط هنا لتسجيل الدخول</a>
+      </span>
+    </p>
+  </div>
+
+  <!-- صفحة إعادة تعيين كلمة المرور -->
+  <div id="resetPassword" class="container hidden">
+    <h2>إعادة تعيين كلمة المرور</h2>
+    <input type="text" id="resetUsername" placeholder="اسم المستخدم">
+    <input type="email" id="resetEmail" placeholder="البريد الإلكتروني">
+    <input type="password" id="resetNewPassword" placeholder="كلمة المرور الجديدة">
+    <input type="password" id="resetConfirmPassword" placeholder="تأكيد كلمة المرور الجديدة">
+    <button class="menu-btn" onclick="resetPassword()">إعادة تعيين كلمة المرور</button>
+    <p style="margin-top:15px;">
+      <span style="color:#fff; background-color:#333; padding:5px 10px; border-radius:5px;">
+        لديك حساب؟ <a onclick="showSection('login')">اضغط هنا لتسجيل الدخول</a>
+      </span>
+    </p>
+  </div>
+
+  <!-- الصفحة الرئيسية بعد تسجيل الدخول -->
+  <div id="main" class="container hidden">
+    <h2 id="welcome">أهلا بك</h2>
+    <input type="text" id="breederName" placeholder="اسم المربي">
+    <input type="text" id="breederPhone" placeholder="رقم جوال المربي">
+    <select id="vaccineType">
+      <option value="معوي">معوي</option>
+      <option value="دموي">دموي</option>
+      <option value="مزدوج">مزدوج</option>
+      <option value="طاعون">طاعون</option>
+      <option value="جدري">جدري</option>
+      <option value="قلاعية">قلاعية</option>
+    </select>
+    <br><br>
+    <label>تاريخ التطعيم:</label>
+    <input type="datetime-local" id="vaccinationDate">
+    <br><br>
+    <label for="nextAppointment">موعد الجاي بعد:</label>
+    <select id="nextAppointment">
+      <option value="14">أسبوعين</option>
+      <option value="21">ثلاث أسابيع</option>
+    </select>
+    <br><br>
+    <button class="menu-btn" onclick="addBreeder()">اضغط للإرسال</button>
+    <p id="message" style="display: none;"></p>
+  </div>
+
+  <!-- صفحة سجل المربين -->
+  <div id="breeders" class="container hidden">
+    <h2>سجل المربين</h2>
+    <input type="text" id="search" oninput="searchBreeders()" placeholder="بحث في السجل">
+    <br><br>
+    <div id="records-list"></div>
+  </div>
+
+  <script>
+    // تعريف مصفوفة المربين للمستخدم الحالي
+    let breeders = [];
+
+    // تبديل ظهور القائمة
+    function toggleMenu() {
+      let menu = document.getElementById("menu");
+      menu.classList.toggle("show");
+    }
+
+    // إظهار الأقسام المختلفة (تم إضافة resetPassword)
+    function showSection(section) {
+      const sections = ["login", "register", "main", "breeders", "resetPassword"];
+      sections.forEach(s => {
+        document.getElementById(s).classList.add("hidden");
+      });
+      document.getElementById(section).classList.remove("hidden");
+      // إخفاء القائمة عند الانتقال لأي قسم
+      document.getElementById("menu").classList.remove("show");
+      if(section === "breeders"){
+        showBreeders();
+      }
+    }
+
+    // تحديث رسالة الترحيب في الصفحة الرئيسية
+    function updateWelcome() {
+      let username = localStorage.getItem("username");
+      document.getElementById("welcome").innerText = "أهلا بك يا " + username;
+    }
+
+    // دالة تسجيل الدخول
+    function loginUser() {
+      let username = document.getElementById("loginUsername").value;
+      let password = document.getElementById("loginPassword").value;
+      let accountData = localStorage.getItem("account_" + username);
+      if (accountData) {
+        let account = JSON.parse(accountData);
+        if (username === account.username && password === account.password) {
+          localStorage.setItem("username", username);
+          // تحميل سجلات المربين الخاصة بالمستخدم
+          breeders = JSON.parse(localStorage.getItem("breeders_" + username)) || [];
+          updateWelcome();
+          showSection("main");
+        } else {
+          alert("اسم المستخدم أو كلمة المرور غير صحيحة");
+        }
+      } else {
+        alert("الحساب غير موجود. الرجاء إنشاء حساب.");
+      }
+    }
+
+    // دالة إنشاء الحساب
+    function registerUser() {
+      let username = document.getElementById("registerUsername").value;
+      let email = document.getElementById("registerEmail").value;
+      let password = document.getElementById("registerPassword").value;
+      let confirmPassword = document.getElementById("registerConfirmPassword").value;
+      
+      if (!email) {
+        alert("يرجى إدخال البريد الإلكتروني");
+        return;
+      }
+      if (password !== confirmPassword) {
+        alert("كلمة المرور وتأكيدها غير متطابقين");
+        return;
+      }
+      // التأكد من عدم وجود حساب بنفس اسم المستخدم
+      if (localStorage.getItem("account_" + username)) {
+        alert("اسم المستخدم موجود بالفعل");
+        return;
+      }
+      let account = { username, email, password };
+      localStorage.setItem("account_" + username, JSON.stringify(account));
+      localStorage.setItem("username", username);
+      // تحميل سجلات المربين الخاصة بالمستخدم (في البداية ستكون فارغة)
+      breeders = JSON.parse(localStorage.getItem("breeders_" + username)) || [];
+      updateWelcome();
+      showSection("main");
+    }
+
+    // دالة إعادة تعيين كلمة المرور
+    function resetPassword() {
+      let username = document.getElementById("resetUsername").value;
+      let email = document.getElementById("resetEmail").value;
+      let newPassword = document.getElementById("resetNewPassword").value;
+      let confirmPassword = document.getElementById("resetConfirmPassword").value;
+      
+      if (newPassword !== confirmPassword) {
+        alert("كلمة المرور وتأكيدها غير متطابقين");
+        return;
+      }
+      let accountData = localStorage.getItem("account_" + username);
+      if (!accountData) {
+        alert("الحساب غير موجود");
+        return;
+      }
+      let account = JSON.parse(accountData);
+      // التحقق من تطابق البريد الإلكتروني
+      if(account.email !== email){
+        alert("البريد الإلكتروني غير مطابق للحساب");
+        return;
+      }
+      account.password = newPassword;
+      localStorage.setItem("account_" + username, JSON.stringify(account));
+      alert("تم إعادة تعيين كلمة المرور بنجاح");
+      showSection("login");
+    }
+
+    // إضافة مربي جديد
+    function addBreeder() {
+      let name = document.getElementById("breederName").value;
+      let phone = document.getElementById("breederPhone").value;
+      let vaccine = document.getElementById("vaccineType").value;
+      let vaccinationDate = document.getElementById("vaccinationDate").value;
+      let nextAppointmentValue = document.getElementById("nextAppointment").value;
+
+      if (!name || !phone || !vaccinationDate) {
+        document.getElementById("message").innerText = "يرجى تعبئة جميع الحقول";
+        document.getElementById("message").style.display = 'block';
+        return;
+      }
+
+      let date = new Date(vaccinationDate);
+      let nextAppointment = new Date(date.getTime() + parseInt(nextAppointmentValue) * 24 * 60 * 60 * 1000);
+
+      breeders.push({ name, phone, vaccine, vaccinationDate, nextAppointment });
+      localStorage.setItem("breeders_" + localStorage.getItem("username"), JSON.stringify(breeders));
+
+      document.getElementById("message").innerText = "تم الإرسال";
+      document.getElementById("message").style.display = 'block';
+
+      // إفراغ الحقول بعد الإرسال
+      document.getElementById("breederName").value = "";
+      document.getElementById("breederPhone").value = "";
+      document.getElementById("vaccinationDate").value = "";
+      document.getElementById("vaccineType").selectedIndex = 0;
+      document.getElementById("nextAppointment").selectedIndex = 0;
+
+      setTimeout(() => {
+        document.getElementById("message").style.display = 'none';
+      }, 3000);
+
+      showBreeders();
+    }
+
+    // عرض سجل المربين
+    function showBreeders() {
+      let recordsList = document.getElementById("records-list");
+      recordsList.innerHTML = "";
+
+      breeders.forEach((breeder, index) => {
+        let nextAppointmentInDays = calculateRemainingDays(breeder.nextAppointment);
+        let div = document.createElement("div");
+        div.className = "record";
+        div.innerHTML = `
+          ${breeder.name} - الموعد الجاي: ${nextAppointmentInDays} يوم
+          <button class="edit-btn" onclick="editBreeder(${index})">تعديل</button>
+          <button class="delete-btn" onclick="deleteBreeder(${index})">حذف</button>
+        `;
+        div.onclick = (e) => {
+          // منع تداخل الضغط على الأزرار مع تفعيل التفاصيل
+          if(e.target.tagName !== 'BUTTON'){
+            toggleDetails(index, div);
+          }
+        };
+        recordsList.appendChild(div);
+      });
+    }
+
+    // تبديل تفاصيل المربي
+    function toggleDetails(index, div) {
+      let breeder = breeders[index];
+      let detailsDiv = document.getElementById(`details-${index}`);
+      if (detailsDiv) {
+        detailsDiv.remove();
+      } else {
+        let nextAppointmentInDays = calculateRemainingDays(breeder.nextAppointment);
+        let details = document.createElement("div");
+        details.id = `details-${index}`;
+        details.innerHTML = `
+          <p>رقم الجوال: ${breeder.phone}</p>
+          <p>نوع التطعيم: ${breeder.vaccine}</p>
+          <p>تاريخ التطعيم: ${breeder.vaccinationDate}</p>
+          <p>الموعد الجاي: ${nextAppointmentInDays} يوم</p>
+          <button class="hide-btn" onclick="toggleDetails(${index}, this.parentElement.parentElement)">إخفاء التفاصيل</button>
+        `;
+        div.appendChild(details);
+      }
+    }
+
+    // حذف مربي
+    function deleteBreeder(index) {
+      breeders.splice(index, 1);
+      localStorage.setItem("breeders_" + localStorage.getItem("username"), JSON.stringify(breeders));
+      showBreeders();
+    }
+
+    // تعديل مربي
+    function editBreeder(index) {
+      let breeder = breeders[index];
+      document.getElementById("breederName").value = breeder.name;
+      document.getElementById("breederPhone").value = breeder.phone;
+      document.getElementById("vaccineType").value = breeder.vaccine;
+      document.getElementById("vaccinationDate").value = breeder.vaccinationDate;
+
+      breeders.splice(index, 1);
+      localStorage.setItem("breeders_" + localStorage.getItem("username"), JSON.stringify(breeders));
+      showSection('main');
+    }
+
+    // البحث في السجل
+    function searchBreeders() {
+      let query = document.getElementById("search").value.toLowerCase();
+      let recordsList = document.getElementById("records-list");
+      recordsList.innerHTML = "";
+
+      breeders.forEach((breeder, index) => {
+        if (breeder.name.toLowerCase().includes(query) || breeder.vaccine.toLowerCase().includes(query)) {
+          let div = document.createElement("div");
+          div.className = "record";
+          div.innerHTML = `
+            ${breeder.name} - الموعد الجاي: ${calculateRemainingDays(breeder.nextAppointment)} يوم
+            <button class="edit-btn" onclick="editBreeder(${index})">تعديل</button>
+            <button class="delete-btn" onclick="deleteBreeder(${index})">حذف</button>
+          `;
+          div.onclick = (e) => {
+            if(e.target.tagName !== 'BUTTON'){
+              toggleDetails(index, div);
+            }
+          };
+          recordsList.appendChild(div);
+        }
+      });
+    }
+
+    // حساب الأيام المتبقية
+    function calculateRemainingDays(date) {
+      return Math.ceil((new Date(date) - new Date()) / (1000 * 60 * 60 * 24));
+    }
+
+    // دالة تسجيل الخروج مع تأكيد
+    function logout() {
+      if (confirm("متاكد من تسجيل الخروج؟")) {
+        localStorage.removeItem("username");
+        showSection("login");
+        alert("تم تسجيل الخروج");
+      }
+    }
+
+    // عند تحميل الصفحة، التحقق من تسجيل الدخول وتحميل سجلات المربين الخاصة بالمستخدم
+    window.onload = function() {
+      if (localStorage.getItem("username")) {
+        updateWelcome();
+        let username = localStorage.getItem("username");
+        breeders = JSON.parse(localStorage.getItem("breeders_" + username)) || [];
+        showSection("main");
+      } else {
+        showSection("login");
+      }
+      showBreeders();
+    }
+  </script>
+
+</body>
+  </html>
+  تم تصميم الموقع بواسطة الدكتور علي بلال
